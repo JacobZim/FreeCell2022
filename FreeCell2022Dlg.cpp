@@ -22,7 +22,7 @@
 // Add Cell methods CanRemoveCard, CanAddCard for 3 types of Cells.
 // Two clicks moves a card, only if it is legal
 // A second click on the same cell deselects it
-// Draw something if the user wins. Test it.
+// Draw something if the user wins. Test it. can test by initializing all card but 1 to be in correct place
 
 // Nice Tasks:
 // Add Menus
