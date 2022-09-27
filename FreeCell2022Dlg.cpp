@@ -269,7 +269,7 @@ void CFreeCell2022Dlg::OnPaint()
 		CRect rect;
 		GetClientRect(&rect);
 		// set offsets to maintain aspect ratio:
-		double adjusted_gWY = (float)rect.bottom / rect.right * gWX;
+		gWY = (float)rect.bottom / rect.right * gWX;
 
 		for (int i = 0; i < 16; i++)
 		{
@@ -302,8 +302,8 @@ HCURSOR CFreeCell2022Dlg::OnQueryDragIcon()
 void CFreeCell2022Dlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
-	gPX = gWX;
-	gPY = gWY;
+	gPX = cx;
+	gPY = cy;
 
 	// TODO: Add your message handler code here
 	Invalidate();
