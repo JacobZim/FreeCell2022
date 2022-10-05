@@ -19,7 +19,8 @@ bool DrawCard(HDC hdc, int left, int top, int index, bool selected = false); // 
 bool DrawCardExt(HDC hdc, int left, int top, int width, int height, int index, bool selected);
 bool UninstallCards();
 
-//bool IsBlackCard(int index); //if suit is 0 or 3, return true
+bool IsBlackCard(int index); //if suit is 0 or 3, return true
+int GetCardRank(int index);
 
 // The card width and height get set in InitializeCards:
 extern int gCardWidth; // 71 pixels

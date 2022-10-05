@@ -106,3 +106,16 @@ bool DrawCardExt(HDC hdc, int left, int top, int width, int height, int index, b
 
 	return (ok == 1);
 }
+
+
+bool IsBlackCard(int index) //if suit is 0 or 3, return true
+{
+	int suite = index % 4;
+	if ((suite == 0) || (suite == 3)) {
+		return true;
+	}
+	return false;
+}
+int GetCardRank(int index) {
+	return index % 13;
+}

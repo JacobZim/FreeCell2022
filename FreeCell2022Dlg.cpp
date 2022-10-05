@@ -134,7 +134,7 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 	// IDM_ABOUTBOX must be in the system command range.
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
-
+	mFirstClick = -1; // test code
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != nullptr)
 	{
@@ -192,8 +192,27 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 		mCells[i] = new StartCell(left, top, right, bottom);
 	}
 
+	// Create a random deck 
+	srand(time(0));
+	int deck[52];
+	for (int i = 0; i < 52; i++)
+		deck[i] = i;
+	for (int i = 0; i < 52; i++)
+	{
+		int j = rand() % 52;
+		int temp = deck[i];
+		deck[i] = deck[j];
+		deck[j] = temp;
+	}
+
 	//Add cards to the start cells:
-	mCells[8]->Push(0);
+	int d = 0;
+	for (int j = 8; j < 12; j++)
+		for (int i = 0; i < 7; i++)
+			mCells[j]->Push(deck[d++]);
+	for (int j = 12; j < 16; j++)
+		for (int i = 0; i < 6; i++)
+			mCells[j]->Push(deck[d++]);
 
 	// NOTE that world coordinates are 100 by 92
 	gWX = 100;
@@ -273,19 +292,21 @@ void CFreeCell2022Dlg::OnPaint()
 
 		for (int i = 0; i < 16; i++)
 		{
-			mCells[i]->Draw(&dc, gWX, gWY, gPX, gPY);
+			mCells[i]->Draw(&dc, gWX, gWY, gPX, gPY, i==mFirstClick);
 		}
-		/*
-		int left = 20;
-		int top = 20;
-		int index = 0;
-		bool selected = false;
-		for (index = 0; index < 52; index++)
-		{
-			DrawCardExt(dc, left, top, 400, 500, index, selected);
-			left += 20;
+
+		bool gameOver = true;
+		for (int i = 0; i < 4; i++) {
+			if (!mCells[i]->IsEmpty())
+				gameOver = false;
 		}
-		*/
+		for (int i = 8; i < 16; i++) {
+			if (!mCells[i]->IsEmpty())
+				gameOver = false;
+		}
+		if (gameOver == true)
+			dc.TextOutW(gWX, gWY, L"You Win");
+		
 		CDialogEx::OnPaint();
 	}
 }
