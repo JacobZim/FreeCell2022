@@ -62,6 +62,15 @@ bool Cell::Contains(CPoint point, double WX, double WY, int PX, int PY) {
 		return true;
 	else return false;
 }
+void Cell::Empty() {
+	//if (IsEmpty())
+	//	return;
+	unsigned int size = mCards.size();
+	for (int i = 0; i < size; i++) {
+		mCards.pop_back();
+	}
+	return;
+}
 
 
 
@@ -97,7 +106,6 @@ void StartCell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selecte
 	if (!IsEmpty())
 	{
 		double topOffset = 0;
-		bool selected = false;
 		for (unsigned int i = 0; i < mCards.size(); i++)
 		{
 			DrawCardExt(*dc, (int)left, (int)(top+topOffset), (int)width, (int)height, mCards[i], selected && (mCards[i] == Top())); //&& i==mCards.size()-1
@@ -178,11 +186,13 @@ bool EndCell::CanReceiveCard(int index) {
 	if (IsEmpty()) {
 		if (newRank == 0)
 			return true;
+		else
+			return false;
 	}
 	int rank = GetCardRank(Top());
 	bool isBlack = IsBlackCard(Top());
-
-	if (newRank == rank - 1) {
+	
+	if (newRank == rank + 1) {
 		if (newIsBlack == isBlack) {
 			return true;
 		}

@@ -13,6 +13,7 @@ public:
 	int Pop();
 	int Top();
 	bool Contains(CPoint point, double WX, double WY, int PX, int PY);
+	void Empty(); // extra helper method to clear a cell of cards for purposes of resetting the game
 	
 
 protected:

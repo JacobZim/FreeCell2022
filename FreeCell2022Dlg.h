@@ -38,4 +38,9 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnClose();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMenuNewgame();
+	afx_msg void OnMenuQuit();
+	afx_msg void OnMenuRestartcurrentgame();
+	afx_msg void OnMenuSwitchdeckpattern();
+	afx_msg void OnMenuUndolastmove();
 };

@@ -117,5 +117,5 @@ bool IsBlackCard(int index) //if suit is 0 or 3, return true
 	return false;
 }
 int GetCardRank(int index) {
-	return index % 13;
+	return index / 4;
 }

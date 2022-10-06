@@ -120,6 +120,11 @@ BEGIN_MESSAGE_MAP(CFreeCell2022Dlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_WM_CLOSE()
 	ON_WM_LBUTTONUP()
+	ON_COMMAND(ID_MENU_NEWGAME, &CFreeCell2022Dlg::OnMenuNewgame)
+	ON_COMMAND(ID_MENU_QUIT, &CFreeCell2022Dlg::OnMenuQuit)
+	ON_COMMAND(ID_MENU_RESTARTCURRENTGAME, &CFreeCell2022Dlg::OnMenuRestartcurrentgame)
+	ON_COMMAND(ID_MENU_SWITCHDECKPATTERN, &CFreeCell2022Dlg::OnMenuSwitchdeckpattern)
+	ON_COMMAND(ID_MENU_UNDOLASTMOVE, &CFreeCell2022Dlg::OnMenuUndolastmove)
 END_MESSAGE_MAP()
 
 
@@ -196,7 +201,7 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 	srand(time(0));
 	int deck[52];
 	for (int i = 0; i < 52; i++)
-		deck[i] = i;
+		deck[i] = 51 - i; 
 	for (int i = 0; i < 52; i++)
 	{
 		int j = rand() % 52;
@@ -379,4 +384,63 @@ void CFreeCell2022Dlg::OnLButtonUp(UINT nFlags, CPoint point)
 	Invalidate();
 
 	CDialogEx::OnLButtonUp(nFlags, point);
+}
+
+
+void CFreeCell2022Dlg::OnMenuNewgame()
+{
+	// TODO: Add your command handler code here
+
+	// Remove cards from cells 
+	for (int i = 0; i < 16; i++) {
+		mCells[i]->Empty();
+	} 
+	
+	// Create a random deck 
+	srand(time(0));
+	int deck[52];
+	for (int i = 0; i < 52; i++)
+		deck[i] = 51 - i;
+	for (int i = 0; i < 52; i++)
+	{
+		int j = rand() % 52;
+		int temp = deck[i];
+		deck[i] = deck[j];
+		deck[j] = temp;
+	}
+
+	//Add cards to the start cells:
+	int d = 0;
+	for (int j = 8; j < 12; j++)
+		for (int i = 0; i < 7; i++)
+			mCells[j]->Push(deck[d++]);
+	for (int j = 12; j < 16; j++)
+		for (int i = 0; i < 6; i++)
+			mCells[j]->Push(deck[d++]);
+	
+	Invalidate();
+}
+
+
+void CFreeCell2022Dlg::OnMenuQuit()
+{
+	// TODO: Add your command handler code here
+}
+
+
+void CFreeCell2022Dlg::OnMenuRestartcurrentgame()
+{
+	// TODO: Add your command handler code here
+}
+
+
+void CFreeCell2022Dlg::OnMenuSwitchdeckpattern()
+{
+	// TODO: Add your command handler code here
+}
+
+
+void CFreeCell2022Dlg::OnMenuUndolastmove()
+{
+	// TODO: Add your command handler code here
 }
