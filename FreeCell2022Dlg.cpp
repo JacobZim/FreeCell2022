@@ -140,6 +140,8 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 	mFirstClick = -1; // test code
+	mUndoStartCell = -1;
+	mUndoEndCell = -1;
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != nullptr)
 	{
@@ -199,25 +201,24 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 
 	// Create a random deck 
 	srand(time(0));
-	int deck[52];
 	for (int i = 0; i < 52; i++)
-		deck[i] = 51 - i; 
+		mDeck[i] = 51 - i; 
 	for (int i = 0; i < 52; i++)
 	{
 		int j = rand() % 52;
-		int temp = deck[i];
-		deck[i] = deck[j];
-		deck[j] = temp;
+		int temp = mDeck[i];
+		mDeck[i] = mDeck[j];
+		mDeck[j] = temp;
 	}
 
 	//Add cards to the start cells:
 	int d = 0;
 	for (int j = 8; j < 12; j++)
 		for (int i = 0; i < 7; i++)
-			mCells[j]->Push(deck[d++]);
+			mCells[j]->Push(mDeck[d++]);
 	for (int j = 12; j < 16; j++)
 		for (int i = 0; i < 6; i++)
-			mCells[j]->Push(deck[d++]);
+			mCells[j]->Push(mDeck[d++]);
 
 	// NOTE that world coordinates are 100 by 92
 	gWX = 100;
@@ -343,7 +344,7 @@ void CFreeCell2022Dlg::OnClose()
 
 	for (int i = 0; i < 16; i++)
 		delete mCells[i];
-
+	
 	CDialogEx::OnClose();
 }
 
@@ -375,6 +376,8 @@ void CFreeCell2022Dlg::OnLButtonUp(UINT nFlags, CPoint point)
 		if (mCells[currentClick]->CanReceiveCard(index))
 		{
 			//move a card from cell mFirstClick to cell currentClick
+			mUndoStartCell = mFirstClick;
+			mUndoEndCell = currentClick;
 			int index = mCells[mFirstClick]->Pop();
 			mCells[currentClick]->Push(index);  // does not check for legal moves yet, be careful
 		}
@@ -394,29 +397,28 @@ void CFreeCell2022Dlg::OnMenuNewgame()
 	// Remove cards from cells 
 	for (int i = 0; i < 16; i++) {
 		mCells[i]->Empty();
-	} 
+	}
 	
 	// Create a random deck 
 	srand(time(0));
-	int deck[52];
 	for (int i = 0; i < 52; i++)
-		deck[i] = 51 - i;
+		mDeck[i] = 51 - i;
 	for (int i = 0; i < 52; i++)
 	{
 		int j = rand() % 52;
-		int temp = deck[i];
-		deck[i] = deck[j];
-		deck[j] = temp;
+		int temp = mDeck[i];
+		mDeck[i] = mDeck[j];
+		mDeck[j] = temp;
 	}
 
 	//Add cards to the start cells:
 	int d = 0;
 	for (int j = 8; j < 12; j++)
 		for (int i = 0; i < 7; i++)
-			mCells[j]->Push(deck[d++]);
+			mCells[j]->Push(mDeck[d++]);
 	for (int j = 12; j < 16; j++)
 		for (int i = 0; i < 6; i++)
-			mCells[j]->Push(deck[d++]);
+			mCells[j]->Push(mDeck[d++]);
 	
 	Invalidate();
 }
@@ -425,12 +427,33 @@ void CFreeCell2022Dlg::OnMenuNewgame()
 void CFreeCell2022Dlg::OnMenuQuit()
 {
 	// TODO: Add your command handler code here
+	UninstallCards();
+
+	for (int i = 0; i < 16; i++)
+		delete mCells[i];
+	WM_CLOSE;  // how do I terminate the window w/o causing freezing?
 }
 
 
 void CFreeCell2022Dlg::OnMenuRestartcurrentgame()
 {
 	// TODO: Add your command handler code here
+
+	// Remove cards from cells 
+	for (int i = 0; i < 16; i++) {
+		mCells[i]->Empty();
+	}
+
+	//Add cards to the start cells using the mDeck data member
+	int d = 0;
+	for (int j = 8; j < 12; j++)
+		for (int i = 0; i < 7; i++)
+			mCells[j]->Push(mDeck[d++]);
+	for (int j = 12; j < 16; j++)
+		for (int i = 0; i < 6; i++)
+			mCells[j]->Push(mDeck[d++]);
+
+	Invalidate();
 }
 
 
@@ -443,4 +466,15 @@ void CFreeCell2022Dlg::OnMenuSwitchdeckpattern()
 void CFreeCell2022Dlg::OnMenuUndolastmove()
 {
 	// TODO: Add your command handler code here
+
+	if ((mUndoEndCell == -1) || (mUndoStartCell == -1)) {
+		return;
+	}
+	else {
+		int index = mCells[mUndoEndCell]->Pop();
+		mCells[mUndoStartCell]->Push(index);
+		mUndoEndCell = -1;
+		mUndoStartCell = -1;
+	}
+	Invalidate();
 }

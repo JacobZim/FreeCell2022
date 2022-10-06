@@ -27,6 +27,9 @@ protected:
 
 	Cell* mCells[16];
 	int mFirstClick; //remembers first clicked cell of a two click move. -1 means nothing clicked
+	int mDeck[52];
+	int mUndoStartCell;
+	int mUndoEndCell;
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
