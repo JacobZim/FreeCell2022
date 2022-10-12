@@ -163,6 +163,8 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 
+	mCardImages[0].Load(L"Scooby_Doo\\scooby1c.jpg");
+
 	bool ok = InitializeCards();
 	if (!ok)
 	{
@@ -291,6 +293,7 @@ void CFreeCell2022Dlg::OnPaint()
 	else
 	{
 		CPaintDC dc(this); // device context for painting
+		SetStretchBltMode(dc, HALFTONE);
 		CRect rect;
 		GetClientRect(&rect);
 		// set offsets to maintain aspect ratio:
@@ -301,6 +304,9 @@ void CFreeCell2022Dlg::OnPaint()
 			mCells[i]->Draw(&dc, gWX, gWY, gPX, gPY, i==mFirstClick);
 		}
 
+		/*bool drawSelected = true;
+		mCardImages[0].StretchBlt(dc, 10, 10, 100, 150, drawSelected ? NOTSRCCOPY : SRCCOPY);
+		*/
 		bool gameOver = true;
 		for (int i = 0; i < 4; i++) {
 			if (!mCells[i]->IsEmpty())
