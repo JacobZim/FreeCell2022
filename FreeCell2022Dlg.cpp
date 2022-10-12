@@ -433,11 +433,12 @@ void CFreeCell2022Dlg::OnMenuNewgame()
 void CFreeCell2022Dlg::OnMenuQuit()
 {
 	// TODO: Add your command handler code here
-	UninstallCards();
-
+	/*UninstallCards();
 	for (int i = 0; i < 16; i++)
 		delete mCells[i];
 	WM_CLOSE;  // how do I terminate the window w/o causing freezing?
+	*/
+	CWnd::SendMessage(WM_CLOSE, 0, 0);
 }
 
 
