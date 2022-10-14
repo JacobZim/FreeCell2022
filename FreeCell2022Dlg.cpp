@@ -83,6 +83,7 @@ public:
 // Implementation
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -95,6 +96,8 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+//	ON_WM_RBUTTONUP()
+ON_WM_XBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -125,6 +128,8 @@ BEGIN_MESSAGE_MAP(CFreeCell2022Dlg, CDialogEx)
 	ON_COMMAND(ID_MENU_RESTARTCURRENTGAME, &CFreeCell2022Dlg::OnMenuRestartcurrentgame)
 	ON_COMMAND(ID_MENU_SWITCHDECKPATTERN, &CFreeCell2022Dlg::OnMenuSwitchdeckpattern)
 	ON_COMMAND(ID_MENU_UNDOLASTMOVE, &CFreeCell2022Dlg::OnMenuUndolastmove)
+	ON_WM_RBUTTONUP()
+	ON_WM_KEYUP()
 END_MESSAGE_MAP()
 
 
@@ -224,8 +229,8 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 
 	// NOTE that world coordinates are 100 by 92
 	gWX = 100;
-	gWY = MARGIN * 3 + CELL_HEIGHT + START_CELL_HEIGHT;
-
+	gWY = MARGIN * 3 + CELL_HEIGHT + START_CELL_HEIGHT ;
+	
 	// Set the desired client size:
 	double scale = 5.0;
 	int clientWidth = (int)(gWX * scale); // Set clientWidth and clientHeight to your desired size
@@ -249,7 +254,7 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 	scaled_size.bottom = static_cast<LONG>(clientHeight * scaling_factor);
 
 	AdjustWindowRectExForDpi(&scaled_size, WS_OVERLAPPEDWINDOW, false, 0, dpi);
-	SetWindowPos(nullptr, 0, 0, scaled_size.right - scaled_size.left, scaled_size.bottom - scaled_size.top, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE);
+	SetWindowPos(nullptr, 0, 0, scaled_size.right - scaled_size.left, 20 + scaled_size.bottom - scaled_size.top, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -304,9 +309,9 @@ void CFreeCell2022Dlg::OnPaint()
 			mCells[i]->Draw(&dc, gWX, gWY, gPX, gPY, i==mFirstClick);
 		}
 
-		/*bool drawSelected = true;
-		mCardImages[0].StretchBlt(dc, 10, 10, 100, 150, drawSelected ? NOTSRCCOPY : SRCCOPY);
-		*/
+		//bool drawSelected = false;
+		//mCardImages[0].StretchBlt(dc, 10, 10, 100, 150, drawSelected ? NOTSRCCOPY : SRCCOPY);
+		
 		bool gameOver = true;
 		for (int i = 0; i < 4; i++) {
 			if (!mCells[i]->IsEmpty())
@@ -400,11 +405,15 @@ void CFreeCell2022Dlg::OnMenuNewgame()
 {
 	// TODO: Add your command handler code here
 
+	
+}
+
+void CFreeCell2022Dlg::NewGame() {
 	// Remove cards from cells 
 	for (int i = 0; i < 16; i++) {
 		mCells[i]->Empty();
 	}
-	
+
 	// Create a random deck 
 	srand(time(0));
 	for (int i = 0; i < 52; i++)
@@ -425,7 +434,10 @@ void CFreeCell2022Dlg::OnMenuNewgame()
 	for (int j = 12; j < 16; j++)
 		for (int i = 0; i < 6; i++)
 			mCells[j]->Push(mDeck[d++]);
-	
+
+	mUndoEndCell = -1;
+	mUndoStartCell = -1;
+
 	Invalidate();
 }
 
@@ -433,18 +445,73 @@ void CFreeCell2022Dlg::OnMenuNewgame()
 void CFreeCell2022Dlg::OnMenuQuit()
 {
 	// TODO: Add your command handler code here
-	/*UninstallCards();
-	for (int i = 0; i < 16; i++)
-		delete mCells[i];
-	WM_CLOSE;  // how do I terminate the window w/o causing freezing?
-	*/
-	CWnd::SendMessage(WM_CLOSE, 0, 0);
+	
+	OnCancel();
+
 }
 
 
 void CFreeCell2022Dlg::OnMenuRestartcurrentgame()
 {
 	// TODO: Add your command handler code here
+
+	RestartCurrentGame();
+
+}
+
+void CFreeCell2022Dlg::RestartCurrentGame() {
+	// Remove cards from cells 
+	for (int i = 0; i < 16; i++) {
+		mCells[i]->Empty();
+	}
+
+	//Add cards to the start cells using the mDeck data member
+	int d = 0;
+	for (int j = 8; j < 12; j++)
+		for (int i = 0; i < 7; i++)
+			mCells[j]->Push(mDeck[d++]);
+	for (int j = 12; j < 16; j++)
+		for (int i = 0; i < 6; i++)
+			mCells[j]->Push(mDeck[d++]);
+
+	mUndoEndCell = -1;
+	mUndoStartCell = -1;
+
+	Invalidate();
+}
+
+
+void CFreeCell2022Dlg::OnMenuSwitchdeckpattern()
+{
+	// TODO: Add your command handler code here
+}
+
+
+void CFreeCell2022Dlg::OnMenuUndolastmove()
+{
+	// TODO: Add your command handler code here
+
+	UndoLastMove(); 
+}
+
+void CFreeCell2022Dlg::UndoLastMove() {
+	if ((mUndoEndCell == -1) || (mUndoStartCell == -1)) {
+		return;
+	}
+	else {
+		int index = mCells[mUndoEndCell]->Pop();
+		mCells[mUndoStartCell]->Push(index);
+		mUndoEndCell = -1;
+		mUndoStartCell = -1;
+	}
+	Invalidate();
+}
+
+
+
+void CFreeCell2022Dlg::OnRButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
 
 	// Remove cards from cells 
 	for (int i = 0; i < 16; i++) {
@@ -461,27 +528,39 @@ void CFreeCell2022Dlg::OnMenuRestartcurrentgame()
 			mCells[j]->Push(mDeck[d++]);
 
 	Invalidate();
+
+	CDialogEx::OnRButtonUp(nFlags, point);
 }
 
 
-void CFreeCell2022Dlg::OnMenuSwitchdeckpattern()
+
+
+void CFreeCell2022Dlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// TODO: Add your command handler code here
-}
+	// TODO: Add your message handler code here and/or call default
 
-
-void CFreeCell2022Dlg::OnMenuUndolastmove()
-{
-	// TODO: Add your command handler code here
-
-	if ((mUndoEndCell == -1) || (mUndoStartCell == -1)) {
-		return;
+	enum ascii {
+		a = 65,
+		n = 78,
+		q = 81,
+		r = 82,
+		u = 85,
+	};
+	
+	switch(nChar) {
+	case n :
+		NewGame();
+		break;
+	case q :
+		OnCancel();
+		break;
+	case r :
+		RestartCurrentGame();
+		break;
+	case u :
+		UndoLastMove();
+		break;
 	}
-	else {
-		int index = mCells[mUndoEndCell]->Pop();
-		mCells[mUndoStartCell]->Push(index);
-		mUndoEndCell = -1;
-		mUndoStartCell = -1;
-	}
-	Invalidate();
+
+	CDialogEx::OnKeyUp(nChar, nRepCnt, nFlags);
 }

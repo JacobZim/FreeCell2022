@@ -40,6 +40,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
+	void RestartCurrentGame();
+	void UndoLastMove();
+	void NewGame();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnClose();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
@@ -48,4 +51,6 @@ public:
 	afx_msg void OnMenuRestartcurrentgame();
 	afx_msg void OnMenuSwitchdeckpattern();
 	afx_msg void OnMenuUndolastmove();
+	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
