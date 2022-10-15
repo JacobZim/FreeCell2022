@@ -130,6 +130,8 @@ BEGIN_MESSAGE_MAP(CFreeCell2022Dlg, CDialogEx)
 	ON_COMMAND(ID_MENU_UNDOLASTMOVE, &CFreeCell2022Dlg::OnMenuUndolastmove)
 	ON_WM_RBUTTONUP()
 	ON_WM_KEYUP()
+	ON_COMMAND(ID_MENU_RESTARTPREVIOUSGAME, &CFreeCell2022Dlg::OnMenuRestartpreviousgame)
+	ON_COMMAND(ID_MENU_NEWSOLVEDGAME, &CFreeCell2022Dlg::OnMenuNewsolvedgame)
 END_MESSAGE_MAP()
 
 
@@ -207,25 +209,13 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 	}
 
 	// Create a random deck 
-	srand(time(0));
-	for (int i = 0; i < 52; i++)
-		mDeck[i] = 51 - i; 
-	for (int i = 0; i < 52; i++)
-	{
-		int j = rand() % 52;
-		int temp = mDeck[i];
-		mDeck[i] = mDeck[j];
-		mDeck[j] = temp;
-	}
+	CreateRandomDeck();
+
+	// Create a solved deck for mPreviousDeck
+	CreateSolvedDeck(1);
 
 	//Add cards to the start cells:
-	int d = 0;
-	for (int j = 8; j < 12; j++)
-		for (int i = 0; i < 7; i++)
-			mCells[j]->Push(mDeck[d++]);
-	for (int j = 12; j < 16; j++)
-		for (int i = 0; i < 6; i++)
-			mCells[j]->Push(mDeck[d++]);
+	PushmDeckToCells();
 
 	// NOTE that world coordinates are 100 by 92
 	gWX = 100;
@@ -400,20 +390,30 @@ void CFreeCell2022Dlg::OnLButtonUp(UINT nFlags, CPoint point)
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
 
-
-void CFreeCell2022Dlg::OnMenuNewgame()
-{
-	// TODO: Add your command handler code here
-
-	
-}
-
-void CFreeCell2022Dlg::NewGame() {
-	// Remove cards from cells 
+void CFreeCell2022Dlg::PushmDeckToCells() {
+	// Remove cards from cells
 	for (int i = 0; i < 16; i++) {
 		mCells[i]->Empty();
 	}
 
+	//Add cards to the start cells using the mDeck data member
+	int d = 0;
+	/*for (int j = 8; j < 12; j++)
+		for (int i = 0; i < 7; i++)
+			mCells[j]->Push(mDeck[d++]);
+	for (int j = 12; j < 16; j++)
+		for (int i = 0; i < 6; i++)
+			mCells[j]->Push(mDeck[d++]);
+			*/
+	for (int i = 0; i < 7; i++)
+		for (int j = 8; j < 12; j++)
+			mCells[j]->Push(mDeck[d++]);
+	for (int i = 0; i < 6; i++)
+		for (int j = 12; j < 16; j++)
+			mCells[j]->Push(mDeck[d++]);
+}
+
+void CFreeCell2022Dlg::CreateRandomDeck() {
 	// Create a random deck 
 	srand(time(0));
 	for (int i = 0; i < 52; i++)
@@ -425,20 +425,48 @@ void CFreeCell2022Dlg::NewGame() {
 		mDeck[i] = mDeck[j];
 		mDeck[j] = temp;
 	}
+}
 
-	//Add cards to the start cells:
-	int d = 0;
-	for (int j = 8; j < 12; j++)
-		for (int i = 0; i < 7; i++)
-			mCells[j]->Push(mDeck[d++]);
-	for (int j = 12; j < 16; j++)
-		for (int i = 0; i < 6; i++)
-			mCells[j]->Push(mDeck[d++]);
+void CFreeCell2022Dlg::CreateSolvedDeck(int deck = 1) {
+	if (deck == 0) {
+		for (int i = 0; i < 52; i++)
+			mDeck[i] = 51 - i;
+	}
+	else {
+		for (int i = 0; i < 52; i++)
+			mPreviousDeck[i] = 51 - i;
+	}
+}
+
+void CFreeCell2022Dlg::OnMenuNewgame()
+{
+	// TODO: Add your command handler code here
+
+	NewGame();
+}
+
+void CFreeCell2022Dlg::NewGame() {
+
+	// Copy mDeck into mPreviousDeck
+	SwapDeckContents();
+
+	CreateRandomDeck();
+
+	PushmDeckToCells();
 
 	mUndoEndCell = -1;
 	mUndoStartCell = -1;
 
 	Invalidate();
+}
+
+void CFreeCell2022Dlg::SwapDeckContents() {
+	int temp;
+	for (int i = 0; i < 52; i++) {
+		temp = mDeck[i];
+		mDeck[i] = mPreviousDeck[i];
+		mPreviousDeck[i] = temp;
+	}
 }
 
 
@@ -459,19 +487,7 @@ void CFreeCell2022Dlg::OnMenuRestartcurrentgame()
 }
 
 void CFreeCell2022Dlg::RestartCurrentGame() {
-	// Remove cards from cells 
-	for (int i = 0; i < 16; i++) {
-		mCells[i]->Empty();
-	}
-
-	//Add cards to the start cells using the mDeck data member
-	int d = 0;
-	for (int j = 8; j < 12; j++)
-		for (int i = 0; i < 7; i++)
-			mCells[j]->Push(mDeck[d++]);
-	for (int j = 12; j < 16; j++)
-		for (int i = 0; i < 6; i++)
-			mCells[j]->Push(mDeck[d++]);
+	PushmDeckToCells();
 
 	mUndoEndCell = -1;
 	mUndoStartCell = -1;
@@ -512,21 +528,7 @@ void CFreeCell2022Dlg::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	// Remove cards from cells 
-	for (int i = 0; i < 16; i++) {
-		mCells[i]->Empty();
-	}
-
-	//Add cards to the start cells using the mDeck data member
-	int d = 0;
-	for (int j = 8; j < 12; j++)
-		for (int i = 0; i < 7; i++)
-			mCells[j]->Push(mDeck[d++]);
-	for (int j = 12; j < 16; j++)
-		for (int i = 0; i < 6; i++)
-			mCells[j]->Push(mDeck[d++]);
-
-	Invalidate();
+	UndoLastMove();
 
 	CDialogEx::OnRButtonUp(nFlags, point);
 }
@@ -540,15 +542,24 @@ void CFreeCell2022Dlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	enum ascii {
 		a = 65,
+		m = 77,
 		n = 78,
+		p = 80,
 		q = 81,
 		r = 82,
+		s = 83,
 		u = 85,
 	};
 	
 	switch(nChar) {
+	case m:
+		NewSolvedGame();
+		break;
 	case n :
 		NewGame();
+		break;
+	case p :
+		RestartPreviousGame();
 		break;
 	case q :
 		OnCancel();
@@ -556,10 +567,40 @@ void CFreeCell2022Dlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	case r :
 		RestartCurrentGame();
 		break;
+	case s :
+		break;
 	case u :
 		UndoLastMove();
 		break;
 	}
 
 	CDialogEx::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+
+void CFreeCell2022Dlg::OnMenuRestartpreviousgame()
+{
+	// TODO: Add your command handler code here
+	RestartPreviousGame();
+}
+
+void CFreeCell2022Dlg::RestartPreviousGame() {
+	SwapDeckContents();
+	PushmDeckToCells();
+	Invalidate();
+}
+
+void CFreeCell2022Dlg::OnMenuNewsolvedgame()
+{
+	// TODO: Add your command handler code here
+	NewSolvedGame();
+}
+
+void CFreeCell2022Dlg::NewSolvedGame() {
+	mUndoStartCell = -1;
+	mUndoEndCell = -1;
+	SwapDeckContents();
+	CreateSolvedDeck(0);
+	PushmDeckToCells();
+	Invalidate();
 }
