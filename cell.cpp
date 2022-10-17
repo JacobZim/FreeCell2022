@@ -7,7 +7,7 @@ Cell::Cell(double left, double top, double right, double bottom)
 {
 }
 
-void Cell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected)
+void Cell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected)  //add CImage mCardImages as a parameter as well as a bool for isScooby
 {
 	COLORREF greenColor(RGB(0, 190, 0));
 	CBrush greenBrush;
@@ -28,7 +28,7 @@ void Cell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected)
 	{
 		unsigned int size = mCards.size();
 		DrawCardExt(*dc, (int)left, (int)(top), (int)width, (int)height, mCards[size - 1], selected);
-	}
+	} //if isScooby, use StretchBlt() with the same parameters to draw scooby cards
 }
 
 bool Cell::CanRemoveCard() {
