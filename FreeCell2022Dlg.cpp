@@ -171,6 +171,7 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 	// TODO: Add extra initialization here
 
 	mCardImages[0].Load(L"Scooby_Doo\\scooby1c.jpg");
+	//do this for all 52 cards, either by looping or hardcoding each load
 
 	bool ok = InitializeCards();
 	if (!ok)
