@@ -5,7 +5,7 @@ class Cell
 {
 public:
 	Cell(double left, double top, double right, double bottom);
-	virtual void Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected);
+	virtual void Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected, CImage cardpack[], bool is_scooby);
 	virtual bool CanRemoveCard();
 	virtual bool CanReceiveCard(int index)=0; //means no basic implementation, each child needs own implementation
 	void Push(int index);
@@ -25,7 +25,7 @@ class StartCell : public Cell
 {
 public: 
 	StartCell(double left, double top, double right, double bottom);
-	void Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected); //double check this ?
+	void Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected, CImage cardpack[], bool is_scooby); //double check this ?
 	virtual bool CanReceiveCard(int index);
 };
 
@@ -40,7 +40,7 @@ class EndCell : public Cell
 {
 public:
 	EndCell(double left, double top, double right, double bottom);
-	virtual void Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected);
+	virtual void Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected, CImage cardpack[], bool is_scooby);
 	virtual bool CanRemoveCard();
 	virtual bool CanReceiveCard(int index); //if empty, should be ace (rank = 0), else, same suit and rank +1
 };

@@ -55,6 +55,7 @@
 #include "FreeCell2022Dlg.h"
 #include "afxdialogex.h"
 #include "WindowsCards.h"
+#include <string>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -170,7 +171,49 @@ BOOL CFreeCell2022Dlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 
-	mCardImages[0].Load(L"Scooby_Doo\\scooby1c.jpg");
+
+	//Load all the Scooby Cards into mCardImages using concatination and a weird stack overflow conversion from std::string to const wchar_t*
+	/* https://stackoverflow.com/questions/246806/i-want-to-convert-stdstring-into-a-const-wchar-t#:~:
+	text=If%20you%20have%20a%20std%3A%3Awstring%20object%2C%20you%20can,std%3A%3Awstring%20name%28L%22
+	Steve%20Nash%22%29%3B%20const%20wchar_t%2A%20szName%20%3D%20name.c_str%28%29%3B
+	*/
+	
+	std::string start = "Scooby_Doo\\scooby";
+	std::string temp;
+	std::string temp2;
+	std::string temp3;
+	std::string end = ".jpg";
+	int k = 0;
+
+	std::wstring widestr;
+	const wchar_t* widecstr; 
+	
+	for (int i = 1; i <= 13; i++) {
+		if (i > 10) {
+			if (i == 11) temp2 = "j";
+			else if (i == 12) temp2 = "q";
+			else if (i == 13) temp2 = "k";
+		}
+		else {
+			temp2 = std::to_string(i);
+		}
+		for (int j = 0; j < 4; j++) {
+			if (j == 0) temp3 = "c";
+			else if (j == 1) temp3 = "d";
+			else if (j == 2) temp3 = "h";
+			else if (j == 3) temp3 = "s";
+
+			temp = start + temp2 + temp3 + end;
+			widestr = std::wstring(temp.begin(), temp.end());
+			widecstr = widestr.c_str();
+			
+			mCardImages[k].Load(widecstr);
+			k++;
+		}
+	}
+	
+	
+	//mCardImages[0].Load(L"Scooby_Doo\\scooby1d.jpg");
 	//do this for all 52 cards, either by looping or hardcoding each load
 
 	bool ok = InitializeCards();
@@ -297,7 +340,7 @@ void CFreeCell2022Dlg::OnPaint()
 
 		for (int i = 0; i < 16; i++)
 		{
-			mCells[i]->Draw(&dc, gWX, gWY, gPX, gPY, i==mFirstClick);
+			mCells[i]->Draw(&dc, gWX, gWY, gPX, gPY, i==mFirstClick, mCardImages, mIsScooby);
 		}
 
 		//bool drawSelected = false;
@@ -500,6 +543,12 @@ void CFreeCell2022Dlg::RestartCurrentGame() {
 void CFreeCell2022Dlg::OnMenuSwitchdeckpattern()
 {
 	// TODO: Add your command handler code here
+	SwapDeckStyle();
+}
+
+void CFreeCell2022Dlg::SwapDeckStyle() {
+	mIsScooby = !mIsScooby;
+	Invalidate();
 }
 
 
@@ -569,6 +618,7 @@ void CFreeCell2022Dlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		RestartCurrentGame();
 		break;
 	case s :
+		SwapDeckStyle();
 		break;
 	case u :
 		UndoLastMove();

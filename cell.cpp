@@ -7,7 +7,7 @@ Cell::Cell(double left, double top, double right, double bottom)
 {
 }
 
-void Cell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected)  //add CImage mCardImages as a parameter as well as a bool for isScooby
+void Cell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected, CImage cardpack[], bool is_scooby)  //add CImage mCardImages as a parameter as well as a bool for isScooby
 {
 	COLORREF greenColor(RGB(0, 190, 0));
 	CBrush greenBrush;
@@ -24,10 +24,11 @@ void Cell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected)  /
 	double bottom = (mBottom * PX / WX);
 	double width = right - left;
 	double height = width * gCardHeight / gCardWidth;
+	unsigned int size = mCards.size();
 	if (!IsEmpty())
 	{
-		unsigned int size = mCards.size();
-		DrawCardExt(*dc, (int)left, (int)(top), (int)width, (int)height, mCards[size - 1], selected);
+		if (!is_scooby) DrawCardExt(*dc, (int)left, (int)(top), (int)width, (int)height, mCards[size - 1], selected);
+		else cardpack[mCards[size - 1]].StretchBlt(*dc, (int)left, (int)top, (int)width, (int)height, selected ? NOTSRCCOPY : SRCCOPY);
 	} //if isScooby, use StretchBlt() with the same parameters to draw scooby cards
 }
 
@@ -82,7 +83,7 @@ StartCell::StartCell(double left, double top, double right, double bottom)
 
 }
 
-void StartCell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected)
+void StartCell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected, CImage cardpack[], bool is_scooby)
 {
 	COLORREF greenColor(RGB(0, 190, 0));
 	CBrush greenBrush;
@@ -108,7 +109,8 @@ void StartCell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selecte
 		double topOffset = 0;
 		for (unsigned int i = 0; i < mCards.size(); i++)
 		{
-			DrawCardExt(*dc, (int)left, (int)(top+topOffset), (int)width, (int)height, mCards[i], selected && (mCards[i] == Top())); //&& i==mCards.size()-1
+			if (!is_scooby) DrawCardExt(*dc, (int)left, (int)(top+topOffset), (int)width, (int)height, mCards[i], selected && (mCards[i] == Top())); //&& i==mCards.size()-1
+			else cardpack[mCards[i]].StretchBlt(*dc, (int)left, (int)(top + topOffset), (int)width, (int)height, (selected && (mCards[i] == Top())) ? NOTSRCCOPY : SRCCOPY);
 			topOffset += height * .3;;
 		}
 	}
@@ -154,7 +156,7 @@ EndCell::EndCell(double left, double top, double right, double bottom)
 {
 
 }
-void EndCell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected) 
+void EndCell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected, CImage cardpack[], bool is_scooby)
 {
 	COLORREF greenColor(RGB(0, 190, 0));
 	CBrush greenBrush;
@@ -174,7 +176,8 @@ void EndCell::Draw(CDC* dc, double WX, double WY, int PX, int PY, bool selected)
 	//bool selected = false;
 	if (!IsEmpty())
 	{
-		DrawCardExt(*dc, (int)left, (int)(top), (int)width, (int)height, mCards[mCards.size() - 1], selected);
+		if (!is_scooby) DrawCardExt(*dc, (int)left, (int)(top), (int)width, (int)height, mCards[mCards.size() - 1], selected);
+		else cardpack[mCards[mCards.size() - 1]].StretchBlt(*dc, (int)left, (int)top, (int)width, (int)height, selected ? NOTSRCCOPY : SRCCOPY);
 	}
 }
 bool EndCell::CanRemoveCard() {

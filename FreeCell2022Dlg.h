@@ -33,6 +33,7 @@ protected:
 	int mPreviousDeck[52];
 	int mUndoStartCell;
 	int mUndoEndCell;
+	bool mIsScooby = false;
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
@@ -50,6 +51,7 @@ public:
 	void NewGame();
 	void NewSolvedGame();
 	void RestartPreviousGame();
+	void SwapDeckStyle();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnClose();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
