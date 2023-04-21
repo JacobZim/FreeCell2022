@@ -519,6 +519,7 @@ void CFreeCell2022Dlg::OnMenuQuit()
 	// TODO: Add your command handler code here
 	
 	OnCancel();
+
 }
 
 
